@@ -1,21 +1,4 @@
-const http = require("node:http")
-const url = require("node:url")
-
-const hostname = "127.0.0.1"
-const port =3000
-
-const users =[
-    {id:1, name:"Tekin"},
-    {id:2, name:"Ali"},
-    {id:3, name:"Veli"},   
-]
-
-const server = http.createServer((req, res) => {
-    // const parsedUrl = url.parse(req.url)
-    // const pathname = parsedUrl.pathname
-    console.log("pathname",pathname)
- 
-    const http = require('node:http');
+const http = require('node:http');
 const url = require("node:url")
 
 const hostname = '127.0.0.1';
@@ -81,8 +64,3 @@ const server = http.createServer((req, res) => {
 server.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
 });
-})
-
-server.listen(port,hostname, () => {
-    console.log(`Server is running at http://${hostname}/${port}`)
-})
