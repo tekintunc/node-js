@@ -10,43 +10,82 @@ const users = [
     { id: 3, name: "Tekin" },
 ]
 
-
 const server = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url)   
+    /**
+     * Cors Settings
+     */
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, DELETE, PUT',
+        'Access-Control-Max-Age': 2592000,
+        'Access-Control-Allow-Headers': 'content-type, X-Requested-With'
+    }
+
+    const parsedUrl = url.parse(req.url)
     const pathname = parsedUrl.pathname
-    const methot =req.method
-    console.log("pathname", pathname)
-    console.log("parsedUrl", parsedUrl)
-    console.log("parsedUrl", parsedUrl)
-    
-    
-    if(methot=== "GET" && pathname === "/users"){
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json');
+    const method = req.method
+
+    if (method == "OPTIONS") {
+        res.writeHead(204, { ...headers, 'Content-Type': 'application/json' });
+        res.end()
+        return;
+    }
+
+    if (method === "GET" && pathname === "/users") {
+        res.writeHead(200, { ...headers, 'Content-Type': 'application/json' })
         res.end(JSON.stringify(users));
-    } else if (methot==="GET" && pathname.startsWith("/users/")){
+    } else if (method === "GET" && pathname.startsWith("/users/")) {
         const userId = Number(pathname.split("/")[2])
         const user = users.find(user => user.id === userId)
-        if(user){
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json');
+        if (user) {
+            res.writeHead(200, { ...headers, 'Content-Type': 'application/json' })
             res.end(JSON.stringify(user));
-        }else {
-            res.statusCode = 404
-            res.setHeader('Content-Type', 'text/plain');
-            res.end('User not found!!!');
-        } 
-
-     } // else if (methoot === "POST" && pathname === "/users") {
-    //     let body = ""
-    //     req.on("data",chunk =>{
-    //         body += chunk.toString()
-    //     })
-
-    // }
-    
-     
-   
+        } else {
+            res.writeHead(404, { ...headers, 'Content-Type': 'text/plain' })
+            res.end("User not found!!!")
+        }
+    } else if (method === "POST" && pathname === "/users") {
+        let body = ""
+        req.on("data", chunk => {
+            body += chunk.toString()
+        })
+        req.on("end", () => {
+            const newUser = JSON.parse(body)
+            users.push(newUser)
+            res.writeHead(201, { ...headers, 'Content-Type': 'application/json' })
+            res.end(JSON.stringify(newUser));
+        })
+    } else if (method === "PUT" && pathname.startsWith("/users/")) {
+        const userId = Number(pathname.split("/")[2])
+        let body = ""
+        req.on("data", chunk => {
+            body += chunk.toString()
+        })
+        req.on("end", () => {
+            const updatedUser = JSON.parse(body)
+            console.log("updatedUser", JSON.parse(body))
+            let userIndex = users.findIndex(user => user.id === userId)
+            if (userIndex !== -1) {
+                users[userIndex] = updatedUser
+                res.writeHead(200, { ...headers, 'Content-Type': 'application/json' })
+                res.end(JSON.stringify(updatedUser));
+            } else {
+                res.writeHead(404, { ...headers, 'Content-Type': 'text/plain' })
+                res.end("User not found!!!")
+            }
+        })
+    } else if (method === "DELETE" && pathname.startsWith("/users/")) {
+        const userId = Number(pathname.split("/")[2])
+        let userIndex = users.findIndex(user => user.id === userId)
+        if (userIndex !== -1) {
+            users.splice(userIndex, 1)
+            res.writeHead(204, headers)
+            res.end();
+        } else {
+            res.writeHead(404, { ...headers, 'Content-Type': 'text/plain' })
+            res.end("User not found!!!")
+        }
+    }
 });
 
 server.listen(port, hostname, () => {
