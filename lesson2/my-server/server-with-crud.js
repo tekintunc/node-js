@@ -27,7 +27,7 @@ const server = http.createServer((req, res) => {
 
     if (method == "OPTIONS") {
         res.writeHead(204, { ...headers, 'Content-Type': 'application/json' });
-        res.end()
+        res.
         return;
     }
 
